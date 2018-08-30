@@ -9,7 +9,7 @@
 #include "math.h"
 
 #ifndef BYTEARRAY_RESERVE_SIZE
-#define BYTEARRAY_RESERVE_SIZE 128		//每个ByteArray在构造的时候预先分配多少内存，单位(字节)
+#define BYTEARRAY_RESERVE_SIZE 128
 #endif
 
 #define BYTEARRAY_USE_CSTRING
@@ -521,7 +521,7 @@ static int lbytearr_create( lua_State *L )
   return 1;
 }
 
-// buf.init( 1,2,3 ) 或者 buf.init( {1,2,3} )
+// buf.init( 1,2,3 ) or buf.init( {1,2,3} )
 static int lbytearr_init( lua_State *L )
 {
   int n = lua_gettop( L );
