@@ -32,8 +32,9 @@ Index start from 1 to length. If out of range, return -1.
 
 ```lua
 local buf = ByteArray.init(2,3)
+buf[2] = 2
 print(buf[1]) -- 2
-print(buf[2]) -- 3
+print(buf[2]) -- 2
 print(buf[3]) -- -1
 ```
 
