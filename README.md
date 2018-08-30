@@ -18,7 +18,8 @@ ByteArray.BIG_ENDIAN    = 1
 `create( [capacity, [endian]] )` Create an empty byte array.   
 `init( [param1, param2, ...] )` Create a byte array with initial bytes. Parameters should be a list of number or table.   
 `load( str )` Create a byte array with lua string object for read data. This byte array is read-only.   
-return - A ByteArray object.
+
+`return` A ByteArray object.
 
 ```lua
 local x = ByteArray.create()  -- create an empty byte array
@@ -36,7 +37,8 @@ local z = ByteArray.load( "hello" ) -- create a byte array with a lua string obj
 `readFloat()` Read a 32-bit float from byte array.   
 `readDouble()` Read a 64-bit float from byte array.   
 `readCString()` Read a string end with \0 from byte array.   
-return - data read
+
+`return` data read
 
 ```lua
 local buf = ByteArray.init( 1, 2, 3, 4, 5, 6 ) 
@@ -55,7 +57,8 @@ local c = buf:readShort() -- c == 0x0403
 `writeFloat( f32 )` Write a 32-bit float to byte array.   
 `writeDouble( f64 )` Write a 64-bit float to byte array.   
 `writeCString( str )` write a string end with \0 to byte array.   
-return - The ByteArray object itself.
+
+`return` The ByteArray object itself.
 
 ```lua
 local buf = ByteArray.create()
@@ -64,7 +67,9 @@ buf:writeByte(1):writeByte(2):writeInt(0x0403)
 
 # method for copying data between ByteArray object
 `readBytes( to[, offset, length] )` Read data to first parameter(a ByteArray object), the range for the target byte array is start from offset with length.    
-`writeBytes( from[, offset, length] )` Write data from first parameter(a ByteArray object), the range for the data is start from offset with length. 
+`writeBytes( from[, offset, length] )` Write data from first parameter(a ByteArray object), the range for the data is start from offset with length.    
+
+`return` nil
 
 ```lua
 local buf = ByteArray.init( 1, 2, 3, 4, 5 )
