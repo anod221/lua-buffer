@@ -27,7 +27,7 @@ local y = ByteArray.init( 0, 1, 2, 3 ) -- create a byte array with initial bytes
 local z = ByteArray.load( "hello" ) -- create a byte array with a lua string object
 ```
 
-# method for read data
+# reading data
 `readByte()` Read a 8-bit signed integer from byte array.   
 `readUnsignedByte()` Read a 8-bit unsigned integer from byte array.   
 `readShort()` Read a 16-bit signed integer from byte array.   
@@ -38,7 +38,7 @@ local z = ByteArray.load( "hello" ) -- create a byte array with a lua string obj
 `readDouble()` Read a 64-bit float from byte array.   
 `readCString()` Read a string end with \0 from byte array.   
 
-`return` data read
+`return` Data read.
 
 ```lua
 local buf = ByteArray.init( 1, 2, 3, 4, 5, 6 ) 
@@ -47,7 +47,7 @@ local b = buf:readUnsignedByte() -- b == 2
 local c = buf:readShort() -- c == 0x0403 
 ```
 
-# method for write data
+# writing data
 `writeByte( s8 )` Write a 8-bit signed integer to byte array.   
 `writeUnsignedByte( u8 )` Write a 8-bit unsigned integer to byte array.   
 `writeShort( s16 )` Write a 16-bit signed integer to byte array.   
@@ -65,7 +65,7 @@ local buf = ByteArray.create()
 buf:writeByte(1):writeByte(2):writeInt(0x0403)
 ```
 
-# method for copying data between ByteArray object
+# copying data between ByteArray object
 `readBytes( to[, offset, length] )` Read data to first parameter(a ByteArray object), the range for the target byte array is start from offset with length.    
 `writeBytes( from[, offset, length] )` Write data from first parameter(a ByteArray object), the range for the data is start from offset with length.    
 
@@ -77,8 +77,41 @@ local d = ByteArray.create()
 buf:readBytes( d )
 ```
 
+# clearing the ByteArray object
+`clear()` Reset the object to an empty byte array.
+
+`return` nil
+
+```lua
+local buf = ByteArray.init(1,2,3,4,5)
+buf:clear()
+print( buf.length ) -- 0
+```
+
+# converting the ByteArray object to lua string
+`toString()` Convert the object to a lua string which allow \0 inside.
+
+`return` A lua string.
+
+```lua
+local buf = ByteArray.init( 49, 50, 51, 52, 53, 0, 54, 55 )
+local str = buf:toString()
+print( str, #str, string.byte(str, 6 ), string.byte(str, 7) )
+```
+
+# slicing the array
+`slice(position_stat, position_end)` The same behavior as slice in ECMAScript.
+
+`return` A new ByteArray object.
+
+```lua
+local buf = ByteArray.init( 1,2,3,4,5,6 )
+local sub = buf:slice( 1, -1 )
+for i=1, #sub do print(sub[i]) end -- 2 3 4 5
+```
+
 # member position
-Start position for reading / writing data.
+Start position for reading / writing data. Position is start from 0 to length.
 
 ```lua
 local buf = ByteArray.init( 1, 2, 3, 4, 5 )
