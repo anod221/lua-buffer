@@ -27,6 +27,16 @@ local y = ByteArray.init( 0, 1, 2, 3 ) -- create a byte array with initial bytes
 local z = ByteArray.load( "hello" ) -- create a byte array with a lua string object
 ```
 
+# indexing
+Index start from 1 to length. If out of range, return -1.
+
+```lua
+local buf = ByteArray.init(2,3)
+print(buf[1]) -- 2
+print(buf[2]) -- 3
+print(buf[3]) -- -1
+```
+
 # reading data
 `readByte()` Read a 8-bit signed integer from byte array.   
 `readUnsignedByte()` Read a 8-bit unsigned integer from byte array.   
@@ -137,14 +147,4 @@ Set / get endian.
 ```lua
 local buf = ByteArray.init(2,3)
 buf.endian = ByteArray.LITTLE_ENDIAN
-```
-
-# indexing
-Index start from 1 to length. If out of range, return -1.
-
-```lua
-local buf = ByteArray.init(2,3)
-print(buf[1]) -- 2
-print(buf[2]) -- 3
-print(buf[3]) -- -1
 ```
