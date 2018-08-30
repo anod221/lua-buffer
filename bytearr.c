@@ -776,7 +776,7 @@ static int lbytearr_writestr( lua_State *L )
   const char *pstr = lua_tostring(L, 2);
   uint8_t *str = &getBuffer(p)[getPosition(p)];
   
-  size_t l = 1 + lua_objlen(L, 2);
+  size_t l = 1 + strlen(pstr);
   
   handle_scope_except();
   
