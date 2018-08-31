@@ -825,15 +825,22 @@ static int lbytearr_slice( lua_State *L )
   if( end <= 0 ){
     end += getLength(p);
   }
-  if( start > end || getLength(p) <= start ){
-    error_handle(L, ERR_OUTOFRANGE);
-    lua_error(L);
-    return 0;
-  }
   
   handle_scope_except();
-
-  Buf *r = cut(p, start, end-start);
+  
+  Buf *r;
+  if( start > end || getLength(p) <= start ){ // empty array
+    r = createBuf( BYTEARRAY_RESERVE_SIZE, getNativeEndian() );
+  }
+  else{
+    if( start < 0 ){ // set start to 0 )
+      start = 0;
+    }
+    if( getLength(p) <= end ){
+      end = getLength(p);
+    }
+    r = cut(p, start, end-start);
+  }
   lua_pushlightuserdata(L, r);
   return 1;
 }

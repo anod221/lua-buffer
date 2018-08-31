@@ -294,6 +294,16 @@ local function test_slice()
    for i=1, #e do
       assert( e[i] == buf[i+#buffer_data-7] )
    end
+   local f = buf:slice( -1000, -1 )
+   assert( #f == #buffer_data - 1 )
+   for i=1, #f do
+      assert( f[i] == buf[i] )
+   end
+   local g = buf:slice( -1000, 1000 )
+   assert( #g == #buffer_data )
+   for i=1, #g do
+      assert( g[i] == buf[i] )
+   end
 end
 
 test_readonly()
