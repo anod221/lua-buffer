@@ -137,7 +137,7 @@ Set / get length.
 
 ```lua
 local buf = ByteArray.init( 1,2,3,4,5,6,7 )
-print( buf.length )
+print( buf.length ) -- 7
 buf.length = 4
 for i=1, #buf do print(buf[i]) end -- 1 2 3 4
 ```
