@@ -304,6 +304,12 @@ local function test_slice()
    for i=1, #g do
       assert( g[i] == buf[i] )
    end
+   local h = buf:slice( 1000, 2000 )
+   assert( #h == 0 )
+   local i = buf:slice( 6, 3 )
+   assert( #h == 0 )
+   local j = buf:slice( -1000, -900 )
+   assert( #h == 0 )
 end
 
 test_readonly()
