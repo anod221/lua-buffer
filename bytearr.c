@@ -829,7 +829,7 @@ static int lbytearr_slice( lua_State *L )
   handle_scope_except();
   
   Buf *r;
-  if( start > end || getLength(p) <= start ){ // empty array
+  if( end < 0 || start > end || (int)getLength(p) <= start ){ // empty array
     r = createBuf( BYTEARRAY_RESERVE_SIZE, getNativeEndian() );
   }
   else{
