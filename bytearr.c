@@ -242,11 +242,12 @@ static Buf* cut( Buf *p, size_t pos, size_t len )
 
   Buf *retval = createBuf( len, getEndian(p) );
   if( retval == NULL ) longjmp( except, ERR_NOMEM );
+  
   if( pos < size && len > 0 ){
     memcpy( retval->buffer, p->buffer+pos, len );
   }
   
-  setLength(retval, len);
+  retval->length = len;
   return retval;
 }
 
@@ -831,7 +832,7 @@ static int lbytearr_slice( lua_State *L )
   }
   
   handle_scope_except();
-    
+
   Buf *r = cut(p, start, end-start);
   lua_pushlightuserdata(L, r);
   return 1;

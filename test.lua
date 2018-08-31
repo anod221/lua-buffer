@@ -263,12 +263,46 @@ local function test_write_bytes()
    assert( src[6] == -1 )
 end
 
+local function test_slice()
+   local buffer_data = {
+      1,2,3,4,5,6,7,8,9,10,
+      11,12,13
+   }
+   local buf = ByteArray.init( buffer_data )
+   local a = buf:slice()
+   assert( #a == #buffer_data )
+   for i=1, #a do
+      assert( a[i] == buffer_data[i] )
+   end
+   local b = buf:slice(4)
+   assert( #b == #buffer_data - 4 )
+   for i=1, #b do
+      assert( b[i] == buf[i+4] )
+   end
+   local c = buf:slice( 2, 8 )
+   assert( #c == 8 - 2 )
+   for i=1, #c do
+      assert( c[i] == buf[i+2] )
+   end
+   local d = buf:slice( 6, -3 )
+   assert( #d == #buffer_data - 3 - 6 )
+   for i=1, #d do
+      assert( d[i] == buf[i+6] )
+   end
+   local e = buf:slice( -7, -2 )
+   assert( #e == 7 - 2 )
+   for i=1, #e do
+      assert( e[i] == buf[i+#buffer_data-7] )
+   end
+end
+
 test_readonly()
 test_index()
 test_tostring()
 test_property_length()
 test_property_position()
 test_endian()
+test_slice()
 test_read_integer()
 test_read_float()
 test_read_cstr()
