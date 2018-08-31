@@ -307,9 +307,9 @@ local function test_slice()
    local h = buf:slice( 1000, 2000 )
    assert( #h == 0 )
    local i = buf:slice( 6, 3 )
-   assert( #h == 0 )
+   assert( #i == 0 )
    local j = buf:slice( -1000, -900 )
-   assert( #h == 0 )
+   assert( #j == 0 )
 end
 
 test_readonly()
