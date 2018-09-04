@@ -276,18 +276,34 @@ static void readBytes( Buf *p, void *bytes, uint32_t offset, size_t length )
   p->position += length;
 }
 
-#define READ_BUILDIN_TEMPLATE( type, name )				\
-  static type name( Buf *p )						\
-  {									\
-    size_t sz = sizeof(type);						\
-    RANGE_CHECK(p, sz);							\
-									\
-    type retval = *(type*)(p->buffer + p->position);			\
-    adjustEndian( (uint8_t*)&retval, sz, getEndian(p) );		\
-    									\
-    p->position += sz;							\
-    return retval;							\
+#ifdef _MEMORY_ALIGN_SAFE
+#define READ_BUILDIN_TEMPLATE( type, name )			\
+  static type name( Buf *p )					\
+  {								\
+    size_t sz = sizeof(type);					\
+    RANGE_CHECK(p, sz);						\
+								\
+    type retval;						\
+    memcpy( &retval, p->buffer + p->position, sz );		\
+    adjustEndian( (uint8_t*)&retval, sz, getEndian(p) );	\
+								\
+    p->position += sz;						\
+    return retval;						\
   }
+#else
+#define READ_BUILDIN_TEMPLATE( type, name )			\
+  static type name( Buf *p )					\
+  {								\
+    size_t sz = sizeof(type);					\
+    RANGE_CHECK(p, sz);						\
+								\
+    type retval = *(type*)(p->buffer + p->position);		\
+    adjustEndian( (uint8_t*)&retval, sz, getEndian(p) );	\
+								\
+    p->position += sz;						\
+    return retval;						\
+  }
+#endif//_MEMORY_ALIGN_SAFE
 
 READ_BUILDIN_TEMPLATE( uint8_t, readUnsignedByte )
 READ_BUILDIN_TEMPLATE( int8_t, readByte )
@@ -330,6 +346,21 @@ static void writeBytes( Buf *p, const void *bytes, uint32_t offset, size_t lengt
   UPDATE_LENGTH(p);
 }
 
+#ifdef _MEMORY_ALIGN_SAFE
+#define WRITE_BUILDIN_TEMPLATE( type, name )	\
+  static void name( Buf *p, type value )	\
+  {						\
+    size_t sz = sizeof(type);			\
+    RANGE_RESERVE(p, sz);			\
+    						\
+    uint8_t *pvalue = p->buffer + p->position;	\
+    memcpy( pvalue, &value, sz );		\
+    adjustEndian(pvalue, sz, getEndian(p));	\
+    						\
+    p->position += sz;				\
+    UPDATE_LENGTH(p);				\
+  }
+#else
 #define WRITE_BUILDIN_TEMPLATE( type, name )		\
   static void name( Buf *p, type value )		\
   {							\
@@ -343,6 +374,7 @@ static void writeBytes( Buf *p, const void *bytes, uint32_t offset, size_t lengt
     p->position += sz;					\
     UPDATE_LENGTH(p);					\
   }
+#endif//_MEMORY_ALIGN_SAFE
 
 WRITE_BUILDIN_TEMPLATE( uint8_t, writeUnsignedByte )
 WRITE_BUILDIN_TEMPLATE( int8_t, writeByte )
