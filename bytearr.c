@@ -507,7 +507,7 @@ WRITE_BUILDIN_TEMPLATE( float, writeFloat )
   }
 
 #define check_userdata_self( L )		\
-  if( !lua_islightuserdata(L, 1) ){		\
+  if( !lua_isuserdata(L, 1) ){			\
     luaL_argerror(L, 1, MSG_INVALIDTYPE);	\
     return 0;					\
   }
@@ -516,6 +516,17 @@ WRITE_BUILDIN_TEMPLATE( float, writeFloat )
     lua_getfield( L, LUA_REGISTRYINDEX, MODULE_NAME "#mt" );	\
     lua_setmetatable( L, -2 );					\
   }
+
+#define lua_pushuserdata( L, p ){		\
+    void *m = lua_newuserdata(L, sizeof(p));	\
+    memcpy(m, &p, sizeof(p));			\
+  }
+
+static inline Buf* lua_tobuffer(lua_State *L, int index)
+{
+  Buf **ud = lua_touserdata(L, index);
+  return *ud;
+}
 
 void error_handle( lua_State *L, int errno )
 {
@@ -549,7 +560,7 @@ static int lbytearr_create( lua_State *L )
   Buf* retval;
   new_buffer( retval, size, endian );
   
-  lua_pushlightuserdata( L, retval );
+  lua_pushuserdata( L, retval );
   set_bytearr_metatable( L );
   return 1;
 }
@@ -616,7 +627,7 @@ static int lbytearr_init( lua_State *L )
     setPosition(retval, 0);
   }
 
-  lua_pushlightuserdata(L, retval);
+  lua_pushuserdata(L, retval);
   set_bytearr_metatable(L);
   return 1;
 }
@@ -640,7 +651,7 @@ static int lbytearr_load( lua_State *L )
     return 0;
   }
   
-  lua_pushlightuserdata( L, retval );
+  lua_pushuserdata( L, retval );
   set_bytearr_metatable( L );
   
   return 1;
@@ -651,7 +662,7 @@ static int lbytearr_tostring( lua_State *L )
 {
   check_userdata_self(L);
   
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   char *b = (char*)getBuffer(p);
   size_t len = getLength(p);
   lua_pushlstring(L, b, len);
@@ -667,10 +678,10 @@ static int lbytearr_tostring( lua_State *L )
   }
 
 #define bytes_param_check(p, s, offset, length) {	\
-    luaL_checktype(L, 1, LUA_TLIGHTUSERDATA);		\
-    luaL_checktype(L, 2, LUA_TLIGHTUSERDATA);		\
-    p = lua_touserdata(L, 1);				\
-    s = lua_touserdata(L, 2);				\
+    luaL_checktype(L, 1, LUA_TUSERDATA);		\
+    luaL_checktype(L, 2, LUA_TUSERDATA);		\
+    p = lua_tobuffer(L, 1);				\
+    s = lua_tobuffer(L, 2);				\
     buflen_t max = ~0;					\
     offset = 0;						\
     length = 0;						\
@@ -735,13 +746,13 @@ static int lbytearr_writebytes( lua_State *L )
   {								\
     check_userdata_self(L);					\
 								\
-    Buf *p = lua_touserdata(L, 1);				\
+    Buf *p = lua_tobuffer(L, 1);				\
     TYPE b = CHECKF(L, 2);					\
 								\
     handle_scope_except();					\
     								\
     FUNC(p, b);							\
-    lua_pushlightuserdata(L, p);				\
+    lua_pushvalue(L, 1);					\
     return 1;							\
   }
 
@@ -760,7 +771,7 @@ LUA_BIND_BUILDIN_WRITER( writef64, writeDouble, luaL_checknumber, double );
   {							   \
     check_userdata_self(L);				   \
 							   \
-    Buf *p = lua_touserdata(L, 1);			   \
+    Buf *p = lua_tobuffer(L, 1);			   \
 							   \
     handle_scope_except();				   \
 							   \
@@ -785,7 +796,7 @@ static int lbytearr_readstr( lua_State *L )
 {
   check_userdata_self(L);
   
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   char *str = (char*)&getBuffer(p)[getPosition(p)];
   
   size_t l = 1 + strlen( str );
@@ -805,7 +816,7 @@ static int lbytearr_writestr( lua_State *L )
 
   luaL_checktype(L, 2, LUA_TSTRING);
   
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   const char *pstr = lua_tostring(L, 2);
   uint8_t *str = &getBuffer(p)[getPosition(p)];
   
@@ -820,7 +831,7 @@ static int lbytearr_writestr( lua_State *L )
   p->position += l;
   p->length += l;
 
-  lua_pushlightuserdata(L, p);
+  lua_pushvalue(L, 1);
   return 1;
 }
 #endif//BYTEARRAY_USE_CSTRING
@@ -831,7 +842,7 @@ static int lbytearr_clear( lua_State *L )
 
   handle_scope_except();
   
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   clear( p );
   return 1;
 }
@@ -840,7 +851,7 @@ static int lbytearr_slice( lua_State *L )
 {
   check_userdata_self(L);
 
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   
   int start = 0;
   int end = getLength(p);
@@ -873,7 +884,8 @@ static int lbytearr_slice( lua_State *L )
     }
     r = cut(p, start, end-start);
   }
-  lua_pushlightuserdata(L, r);
+  lua_pushuserdata(L, r);
+  set_bytearr_metatable(L);
   return 1;
 }
 
@@ -917,7 +929,7 @@ static int lbytearr_getlen( lua_State *L )
 {
   check_userdata_self(L);
 
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   lua_pushinteger( L, getLength(p) );
   return 1;
 }
@@ -926,7 +938,7 @@ static int lbytearr_getter( lua_State *L )
 {
   check_userdata_self(L);
 
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   
   if( lua_type(L, 2) == LUA_TNUMBER ){
     lua_Number arg2 = lua_tonumber(L, 2);
@@ -966,7 +978,7 @@ static int lbytearr_setter( lua_State *L )
 {
   check_userdata_self(L);
 
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   
   handle_scope_except();
   
@@ -1003,7 +1015,7 @@ static int lbytearr_gc( lua_State *L )
 {
   check_userdata_self(L);
 
-  Buf *p = lua_touserdata(L, 1);
+  Buf *p = lua_tobuffer(L, 1);
   release( p );
   return 0;
 }
