@@ -517,9 +517,10 @@ WRITE_BUILDIN_TEMPLATE( float, writeFloat )
     lua_setmetatable( L, -2 );					\
   }
 
-#define lua_pushuserdata( L, p ){		\
+#define lua_pushbuffer( L, p ){		\
     void *m = lua_newuserdata(L, sizeof(p));	\
     memcpy(m, &p, sizeof(p));			\
+    set_bytearr_metatable( L );			\
   }
 
 static inline Buf* lua_tobuffer(lua_State *L, int index)
@@ -560,8 +561,7 @@ static int lbytearr_create( lua_State *L )
   Buf* retval;
   new_buffer( retval, size, endian );
   
-  lua_pushuserdata( L, retval );
-  set_bytearr_metatable( L );
+  lua_pushbuffer( L, retval );
   return 1;
 }
 
@@ -627,8 +627,7 @@ static int lbytearr_init( lua_State *L )
     setPosition(retval, 0);
   }
 
-  lua_pushuserdata(L, retval);
-  set_bytearr_metatable(L);
+  lua_pushbuffer(L, retval);
   return 1;
 }
 
@@ -651,9 +650,7 @@ static int lbytearr_load( lua_State *L )
     return 0;
   }
   
-  lua_pushuserdata( L, retval );
-  set_bytearr_metatable( L );
-  
+  lua_pushbuffer( L, retval );
   return 1;
 }
 
@@ -884,8 +881,7 @@ static int lbytearr_slice( lua_State *L )
     }
     r = cut(p, start, end-start);
   }
-  lua_pushuserdata(L, r);
-  set_bytearr_metatable(L);
+  lua_pushbuffer(L, r);
   return 1;
 }
 
