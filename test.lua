@@ -312,6 +312,20 @@ local function test_slice()
    assert( #j == 0 )
 end
 
+local function test_gc()
+   local buf = ByteArray.create()
+   local mt = getmetatable(buf)
+   local f = mt.__gc
+   local is_collect = false
+   mt.__gc = function( ... )
+      is_collect = true
+      f(...)
+   end
+   buf = nil
+   collectgarbage("collect")
+   assert( is_collect==false )
+end
+
 test_readonly()
 test_index()
 test_tostring()
@@ -327,3 +341,4 @@ test_write_integer()
 test_write_float()
 test_write_cstr()
 test_write_bytes()
+test_gc()
