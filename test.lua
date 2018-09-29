@@ -13,6 +13,17 @@ local function test_read_cstr()
    assert( buf:readCString() == "bytearray")
 end
 
+local function test_read_str()
+   local buffer_data = {
+      0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x77, 0x6f,
+      0x72, 0x6c, 0x64, 0,
+   }
+   local buf = ByteArray.init( buffer_data )
+   assert( buf:readString( 3 ) == string.char(buffer_data[1], buffer_data[2], buffer_data[3]) )
+   assert( buf:readString( 4 ) == string.char(buffer_data[4], buffer_data[5], buffer_data[6], buffer_data[7]))
+   assert( buf.bytesAvailable == #buffer_data-7 )
+end
+
 local function test_read_integer(  )
    local buffer_data = {
       0x0, 0x1, 0x94, 0xda,	-- unsigned byte
@@ -250,6 +261,17 @@ local function test_write_cstr()
    assert( buf:readCString() == "a\nb" )
 end
 
+local function test_write_str()
+   local buf = ByteArray.create()
+   local str = string.char( 1,2,0,3,4,5,0,6,7,8,9 )
+   buf:writeUnsignedInt(#str)
+   buf:writeString(str)
+   assert( #buf == #str + 4 )
+   buf.position = 0
+   assert( buf:readUnsignedInt() == 11 )
+   assert( str == buf:readString(11) )
+end
+
 local function test_write_bytes()
    local src = ByteArray.init( 11, 22, 33, 44, 55 )
    local dst = ByteArray.init( 66, 77, 88, 99, 00 );
@@ -323,7 +345,7 @@ local function test_gc()
    end
    buf = nil
    collectgarbage("collect")
-   assert( is_collect==false )
+   assert( is_collect )
 end
 
 test_readonly()
@@ -336,9 +358,11 @@ test_slice()
 test_read_integer()
 test_read_float()
 test_read_cstr()
+test_read_str()
 test_read_bytes()
 test_write_integer()
 test_write_float()
 test_write_cstr()
+test_write_str()
 test_write_bytes()
 test_gc()

@@ -433,8 +433,10 @@ WRITE_BUILDIN_TEMPLATE( float, writeFloat )
 #define METHOD_WRITEFLOAT              "f32w"
 #define METHOD_READDOUBLE              "f64r"
 #define METHOD_WRITEDOUBLE             "f64w"
-#define METHOD_READCSTR                "strr"
-#define METHOD_WRITECSTR               "strw"
+#define METHOD_READCSTR                "trr"
+#define METHOD_WRITECSTR               "trw"
+#define METHOD_READSTR                 "strr"
+#define METHOD_WRITESTR                "strw"
 
 #define METHOD_READBYTES               "read"   // local s = buf.create(); b:read(s, 0, b.length)
 #define METHOD_WRITEBYTES              "write"  // local s = buf.load("hello"); b:write(s, 0, s.length)
@@ -488,6 +490,8 @@ WRITE_BUILDIN_TEMPLATE( float, writeFloat )
 #define METHOD_WRITEDOUBLE             "writeDouble"
 #define METHOD_READCSTR                "readCString"
 #define METHOD_WRITECSTR               "writeCString"
+#define METHOD_READSTR                 "readString"
+#define METHOD_WRITESTR                "writeString"
 
 #define METHOD_READBYTES               "readBytes"
 #define METHOD_WRITEBYTES              "writeBytes"
@@ -787,9 +791,47 @@ LUA_BIND_BUILDIN_READER( readu32, readUnsignedInt, uint32_t, pushnumber );
 LUA_BIND_BUILDIN_READER( readf32, readFloat, float, pushnumber );
 LUA_BIND_BUILDIN_READER( readf64, readDouble, double, pushnumber );
 
+// local s = buf:readString( 3 ) -- read 3 byte as lua string
+static int lbytearr_readlstr( lua_State *L )
+{
+  check_userdata_self(L);
+
+  Buf *p = lua_tobuffer(L, 1);
+  size_t l = lua_tointeger( L, 2 );
+  char *str = (char*)&getBuffer(p)[getPosition(p)];
+
+  if( getBytesAvailable(p) < l ){
+    error_handle(L, ERR_OUTOFRANGE);
+    lua_error(L);
+    return 0;
+  }
+  
+  lua_pushlstring(L, str, l);
+  p->position += l;
+  return 1;
+}
+
+// buf:writeString( "hello" )
+static int lbytearr_writelstr( lua_State *L )
+{
+  check_userdata_self(L);
+
+  luaL_checktype(L, 2, LUA_TSTRING);
+  
+  Buf *p = lua_tobuffer(L, 1);
+  const char *pstr = lua_tostring(L, 2);
+  size_t l = lua_objlen(L, 2);
+  
+  handle_scope_except();
+  writeBytes(p, pstr, 0, l);
+  
+  lua_pushvalue(L, 1);
+  return 1;
+}
+
 #ifdef BYTEARRAY_USE_CSTRING
 // local t = b:readCString()
-static int lbytearr_readstr( lua_State *L )
+static int lbytearr_readcstr( lua_State *L )
 {
   check_userdata_self(L);
   
@@ -807,7 +849,7 @@ static int lbytearr_readstr( lua_State *L )
   p->position += l;
   return 1;
 }
-static int lbytearr_writestr( lua_State *L )
+static int lbytearr_writecstr( lua_State *L )
 {
   check_userdata_self(L);
 
@@ -914,9 +956,11 @@ static luaL_Reg bytearr_map[] = {
   { METHOD_READDOUBLE, lbytearr_readf64 },
   { METHOD_READBYTES, lbytearr_readbytes },
   { METHOD_WRITEBYTES, lbytearr_writebytes },
+  { METHOD_READSTR, lbytearr_readlstr },
+  { METHOD_WRITESTR, lbytearr_writelstr },
 #ifdef BYTEARRAY_USE_CSTRING
-  { METHOD_READCSTR, lbytearr_readstr },
-  { METHOD_WRITECSTR, lbytearr_writestr },
+  { METHOD_READCSTR, lbytearr_readcstr },
+  { METHOD_WRITECSTR, lbytearr_writecstr },
 #endif
   {NULL, NULL}
 };
