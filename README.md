@@ -48,6 +48,7 @@ print(buf[3]) -- -1
 `readFloat()` Read a 32-bit float from byte array.   
 `readDouble()` Read a 64-bit float from byte array.   
 `readCString()` Read a string end with \0 from byte array.   
+`readString(n)` Read a lua string with n bytes.   
 
 `return` Data read.
 
@@ -67,7 +68,8 @@ local c = buf:readShort() -- c == 0x0403
 `writeUnsignedInt( u32 )` Write a 32-bit unsigned integer to byte array.   
 `writeFloat( f32 )` Write a 32-bit float to byte array.   
 `writeDouble( f64 )` Write a 64-bit float to byte array.   
-`writeCString( str )` write a string end with \0 to byte array.   
+`writeCString( str )` Write a string end with \0 to byte array.   
+`writeString( str )` Write a lua string, and no \0 append to the string. If read, write the len of str is advised.   
 
 `return` The ByteArray object itself.
 
