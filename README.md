@@ -15,9 +15,9 @@ ByteArray.BIG_ENDIAN    = 1
 ```
 
 # constructor
-`create( [capacity, [endian]] )` Create an empty byte array.   
+`create( [capacity[, endian]] )` Create an empty byte array.   
 `init( [param1, param2, ...] )` Create a byte array with initial bytes. Parameters should be a list of number or table.   
-`load( str )` Create a byte array with lua string object for read data. This byte array is read-only.   
+`load( str[, endian] )` Create a byte array with lua string object for read data. This byte array is read-only.   
 
 `return` A ByteArray object.
 
